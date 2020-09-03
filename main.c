@@ -4,16 +4,16 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include <linux/if.h>
+#include <net/if.h>
 #include <linux/if_tun.h>
 #include <errno.h>
 #include <net/if_arp.h>
+#include <net/ethernet.h>
+#include <netinet/in.h>
 
 #include "proto.h"
 
 #define BUFSIZE 2000
-
-int tap_fd;
 
 void handle_frame(struct dev *dev, struct frame *frame, unsigned int frame_len) {
     frame->type = ntohs(frame->type);
@@ -21,7 +21,7 @@ void handle_frame(struct dev *dev, struct frame *frame, unsigned int frame_len) 
         case ETH_P_ARP:
             printf("ARP\n");
             struct arp_ipv4 *arp_pac = (struct arp_ipv4 *) frame->payload;
-            if (ntohs(arp_pac->hardware) == ARPHRD_ETHER && ntohs(arp_pac->protocol) == 0x0800) {
+            if (ntohs(arp_pac->hardware) == ARPHRD_ETHER && ntohs(arp_pac->protocol) == ETHERTYPE_IP) {
                 arp_pac->operation = ntohs(arp_pac->operation);
                 arp(dev, frame, arp_pac, frame_len);
             }
@@ -31,11 +31,11 @@ void handle_frame(struct dev *dev, struct frame *frame, unsigned int frame_len) 
             {
             printf("IPv4\n");
             struct ipv4 *ip_pac = (struct ipv4 *) frame->payload;
-            if (ip_pac->protocol == 1) {
+            if (ip_pac->protocol == IPPROTO_ICMP) {
                 printf("ICMP\n");
                 icmp(dev, frame, ip_pac, frame_len);
             }
-            else if (ip_pac->protocol == 17) {
+            else if (ip_pac->protocol == IPPROTO_UDP) {
                 printf("UDP\n");
                 udp(dev, frame, ip_pac, frame_len);
             }
@@ -78,8 +78,7 @@ int main() {
     memset(&buffer, 0, BUFSIZE);
     char tap_name[IFNAMSIZ];
     strcpy(tap_name, "tap0");
-    tap_fd = tap_alloc(tap_name);
-    printf("%d - %s\n", tap_fd, tap_name);
+    set_tap_fd(tap_alloc(tap_name));
 
     //get mac
     FILE *fp;
@@ -98,11 +97,11 @@ int main() {
     //printf("%x:%x:%x:%x:%x:%x\n", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
     while(1) {
-        int nread = read(tap_fd, buffer, BUFSIZE);
+        int nread = tap_read((struct frame *)buffer, BUFSIZE);
         if (nread < 0) {
             printf("\nERROR: reading from tap_fd: %s\n", strerror(errno));
         }
         else printf("\nRead %d bytes from device %s\n", nread, tap_name);
-        handle_frame(&dev, (struct frame *) buffer, nread);
+        handle_frame(&dev, (struct frame *)buffer, nread);
     }
 }

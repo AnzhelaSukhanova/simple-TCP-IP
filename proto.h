@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <net/if_arp.h>
+#include <linux/icmp.h>
 #include "dev.h"
 #include "frame.h"
 #include "tools.h"

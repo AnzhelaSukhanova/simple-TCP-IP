@@ -1,6 +1,6 @@
 #include "tools.h"
 
-extern int tap_fd;
+int tap_fd;
 
 void print_hex(char *str, int len)
 {
@@ -29,6 +29,14 @@ uint16_t check_sum(void *addr, int count)
     return ~sum;
 }
 
-void tap_write(struct frame *frame, unsigned int len) {
-    write(tap_fd, frame, len);
+void set_tap_fd(int fd) {
+    tap_fd = fd;
+}
+
+int tap_write(struct frame *frame, unsigned int len) {
+    return write(tap_fd, frame, len);
+}
+
+int tap_read(struct frame *frame, unsigned int len) {
+    return read(tap_fd, frame, len);
 }

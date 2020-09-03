@@ -20,9 +20,10 @@ void arp(struct dev *dev, struct frame *frame, struct arp_ipv4 *packet, unsigned
 
 void icmp(struct dev *dev, struct frame *frame, struct ipv4 *ip_pac, unsigned int frame_len) {
     struct icmp *icmp_pac = (struct icmp *) ip_pac->payload;
-    if (icmp_pac->type == 8) {
-        if (icmp_pac->code == 0) {
-            icmp_pac->type = 0;
+    if (icmp_pac->type == ICMP_ECHO) {
+        if (icmp_pac->code == 0) //no code
+        {
+            icmp_pac->type = ICMP_ECHOREPLY;
             uint32_t for_swap = ip_pac->sip;
             ip_pac->sip = ip_pac->dip;
             ip_pac->dip = for_swap;
