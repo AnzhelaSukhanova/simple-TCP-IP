@@ -1,2 +1,2 @@
-# Simple stack TCP/IP
+# Simple TCP/IP stack 
 
