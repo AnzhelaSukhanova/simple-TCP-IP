@@ -5,13 +5,10 @@
 #include <stdint.h>
 
 struct frame {
-    unsigned char preamble[4];
-    unsigned char da[6];
-    unsigned char sa[6];
+    uint8_t da[6];
+    uint8_t sa[6];
     uint16_t type;
-    unsigned char payload[]; //46-1500 + fcs(4)
+    uint8_t payload[]; //46-1500 + fcs(4)
 }__attribute__((packed));
-
-struct frame* init_frame(char* buf);
 
 #endif //STACK_FRAME_H

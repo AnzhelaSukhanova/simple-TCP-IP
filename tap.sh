@@ -1,6 +1,4 @@
-#!/usr/bin/bash
-
-set -ex
+#!/bin/sh
 
 if [ "$1" = "" ]; then
     if [ ! -e /sys/class/net/tap0 ]; then

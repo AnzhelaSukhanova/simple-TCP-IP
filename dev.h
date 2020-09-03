@@ -6,10 +6,8 @@
 #include <stdio.h>
 #include <string.h>
 
-extern int tap_fd;
-
 struct dev {
-    uint32_t ip; //IPv4
+    uint32_t ip;
     unsigned char mac[6];
 };
 

@@ -1,5 +1,7 @@
 #include "tools.h"
 
+extern int tap_fd;
+
 void print_hex(char *str, int len)
 {
     for (int i = 0; i < len; i ++) {
@@ -25,4 +27,8 @@ uint16_t check_sum(void *addr, int count)
         sum = (sum & 0xffff) + (sum >> 16);
 
     return ~sum;
+}
+
+void tap_write(struct frame *frame, unsigned int len) {
+    write(tap_fd, frame, len);
 }
