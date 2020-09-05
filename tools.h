@@ -12,5 +12,7 @@ uint16_t check_sum(void *addr, int count);
 void set_tap_fd(int fd);
 int tap_write(struct frame *frame, unsigned int len);
 int tap_read(struct frame *frame, unsigned int len);
+int broadcast(uint8_t *mac);
+int multicast(uint8_t *mac);
 
 #endif //STACK_TOOLS_H

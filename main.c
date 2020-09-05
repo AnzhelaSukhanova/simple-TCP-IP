@@ -74,15 +74,13 @@ int tap_alloc(char *name) //taken from Documentation/networking/tuntap.txt
 }
 
 int main() {
-    char buffer[BUFSIZE];
-    memset(&buffer, 0, BUFSIZE);
     char tap_name[IFNAMSIZ];
     strcpy(tap_name, "tap0");
     set_tap_fd(tap_alloc(tap_name));
 
     //get mac
     FILE *fp;
-    unsigned char mac[6];
+    uint8_t mac[6];
     if ((fp = fopen("/sys/class/net/tap0/address", "r")) == NULL)
         printf("\nERROR: reading from /sys/class/net/tap0/address: %s\n", strerror(errno));
     else {
@@ -90,18 +88,19 @@ int main() {
                &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
         fclose(fp);
     }
-
     struct dev dev;
     mac[5] = ~mac[5];
     init_dev(&dev, "10.0.0.2", mac);
-    //printf("%x:%x:%x:%x:%x:%x\n", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    struct frame *frame;
 
-    while(1) {
-        int nread = tap_read((struct frame *)buffer, BUFSIZE);
+    while (1) {
+        int nread = tap_read(frame, BUFSIZE);
         if (nread < 0) {
             printf("\nERROR: reading from tap_fd: %s\n", strerror(errno));
         }
         else printf("\nRead %d bytes from device %s\n", nread, tap_name);
-        handle_frame(&dev, (struct frame *)buffer, nread);
+        if (!memcmp(frame->da, mac, 6) || broadcast(frame->da))
+            handle_frame(&dev, frame, nread);
+        else printf("Ethernet frame is not for this dev\n");
     }
 }

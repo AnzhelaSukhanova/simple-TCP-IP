@@ -8,7 +8,7 @@
 #include "frame.h"
 #include "tools.h"
 
-#define FRAME_HDR_LEN 18
+#define FRAME_HDR_LEN 14
 
 struct arp_ipv4 {
     uint16_t hardware;

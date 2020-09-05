@@ -40,3 +40,17 @@ int tap_write(struct frame *frame, unsigned int len) {
 int tap_read(struct frame *frame, unsigned int len) {
     return read(tap_fd, frame, len);
 }
+
+int broadcast(uint8_t *mac)
+{
+    for (int i = 0; i < 6; i++){
+        if (mac[i] != 0xff) return 0;
+    }
+    return 1;
+}
+
+int multicast(uint8_t *mac) //not completed
+{
+    if (mac[0] != 0x01 || mac[1] != 0x00 || mac[2] != 0x5e) return 0;
+    return 1;
+}
